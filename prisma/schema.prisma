@@ -1,0 +1,537 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // SQLite file path - relative to this schema file (prisma/ directory)
+  // At runtime, lib/db.ts resolves to an absolute path via DATABASE_URL override
+  url      = "file:./db/custom.db"
+}
+
+// ─── LEGACY ENUMS ──────────────────────────────────────────────────
+
+enum TransactionType {
+  SALE           // Salg - Output VAT (Udgående moms)
+  PURCHASE       // Køb - Input VAT (Indgående moms)
+  SALARY         // Lønudgifter
+  BANK           // Bankhævelse/-indbetaling
+  Z_REPORT       // Dagens salg (Z-rapport, detailhandel)
+  PRIVATE        // Privatforbrug / Ejerudtræk
+  ADJUSTMENT     // Korrekturpostering
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+// ─── PHASE 1: Core Accounting Enums ───────────────────────────────
+
+enum AccountType {
+  ASSET        // Aktiver
+  LIABILITY    // Gæld
+  EQUITY       // Egenkapital
+  REVENUE      // Indtægter
+  EXPENSE      // Omkostninger
+}
+
+enum AccountGroup {
+  CASH                  // Likvide beholdninger (1xxx)
+  BANK                  // Bank (1xxx)
+  RECEIVABLES           // Tilgodehavender (1xxx)
+  INVENTORY             // Varelager (1xxx)
+  FIXED_ASSETS          // Anlægsaktiver (1xxx)
+  OTHER_ASSETS          // Andre aktiver (1xxx)
+  PAYABLES              // Kreditorer (2xxx)
+  SHORT_TERM_DEBT       // Kortfristet gæld (2xxx)
+  LONG_TERM_DEBT        // Langfristet gæld (2xxx)
+  OTHER_LIABILITIES     // Andre forpligtelser (2xxx)
+  SHARE_CAPITAL         // Aktiekapital (3xxx)
+  RETAINED_EARNINGS     // Årets resultat (3xxx)
+  SALES_REVENUE         // Salgsindtægter (4xxx)
+  OUTPUT_VAT            // Udgående moms (45xx)
+  OTHER_REVENUE         // Andre indtægter (5xxx)
+  INPUT_VAT             // Indgående moms (54xx)
+  COST_OF_GOODS         // Vareforbrug (6xxx)
+  PERSONNEL             // Personaleomkostninger (7xxx)
+  OTHER_OPERATING       // Andre driftsomkostninger (8xxx)
+  FINANCIAL_EXPENSE     // Finansielle omkostninger (9xxx)
+  FINANCIAL_INCOME      // Finansielle indtægter (9xxx)
+  TAX                   // Skat (9xxx)
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  POSTED
+  CANCELLED
+}
+
+enum ContactType {
+  CUSTOMER
+  SUPPLIER
+  BOTH
+}
+
+enum PeriodStatus {
+  OPEN
+  CLOSED
+}
+
+// ─── PHASE 2: VAT Codes ────────────────────────────────────────────
+// Danish VAT classification for journal entry lines
+
+enum VATCode {
+  S25              // Salgsmoms 25% (standard)
+  S12              // Salgsmoms 12% (nedsat)
+  S0               // Salgsmoms 0% (eksport/udenfor EU)
+  SEU              // Salgsmoms EU (IGS - omvendt betalingspligt)
+  K25              // Købsmoms 25% (standard fradragsberettiget)
+  K12              // Købsmoms 12% (nedsat fradragsberettiget)
+  K0               // Købsmoms 0%
+  KEU              // Købsmoms EU (IGS - omvendt betalingspligt)
+  KUF              // Købsmoms uden fradrag
+  NONE             // Ingen moms
+}
+
+// ─── PHASE 3: Recurring Entry Frequency ───────────────────────────
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum RecurringStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+// ─── PHASE 2: Bank Statement ──────────────────────────────────────
+
+enum ReconciliationStatus {
+  UNMATCHED
+  MATCHED
+  MANUAL
+}
+
+// ─── USER ─────────────────────────────────────────────────────────
+
+model User {
+  id               String             @id @default(cuid())
+  email            String             @unique
+  password         String             // bcrypt hash
+  businessName     String?
+  sidebarPrefs     String?            // JSON: { expandedSections: string[] }
+  demoModeEnabled  Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  transactions Transaction[]
+  invoices     Invoice[]
+  companyInfos CompanyInfo[]
+  sessions     Session[]
+  auditLogs    AuditLog[]
+  backups      Backup[]
+  accounts     Account[]
+  journalEntries JournalEntry[]
+  contacts     Contact[]
+  fiscalPeriods FiscalPeriod[]
+  bankStatements    BankStatement[]
+  recurringEntries  RecurringEntry[]
+  budgets           Budget[]
+}
+
+// ─── LEGACY: Single-entry transactions (kept for backwards compat) ─
+
+model Transaction {
+  id              String          @id @default(cuid())
+  date            DateTime
+  type            TransactionType @default(SALE)
+  amount          Float
+  currency        String          @default("DKK")
+  exchangeRate    Float?          // Exchange rate if currency != DKK
+  amountDKK       Float?          // Pre-calculated DKK equivalent
+  description     String
+  vatPercent      Float           @default(25.0)
+  receiptImage    String?
+  invoiceId       String?         // Links transaction to the invoice that generated it
+  cancelled       Boolean         @default(false)
+  cancelReason    String?
+  originalId      String?
+  isDemo          Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoice         Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+}
+
+// ─── COMPANY INFO ─────────────────────────────────────────────────
+
+model CompanyInfo {
+  id                   String   @id @default(cuid())
+  logo                 String?
+  companyName          String
+  address              String
+  phone                String
+  email                String
+  cvrNumber            String
+  invoicePrefix        String
+  bankName             String
+  bankAccount          String
+  bankRegistration     String
+  bankIban             String?
+  bankStreet           String?
+  bankCity             String?
+  bankCountry          String?
+  invoiceTerms         String?
+  nextInvoiceSequence  Int      @default(1)
+  currentYear          Int      @default(2025)
+  isDemo               Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, isDemo])
+}
+
+// ─── INVOICES ─────────────────────────────────────────────────────
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+  customerName    String
+  customerAddress String?
+  customerEmail   String?
+  customerPhone   String?
+  customerCvr     String?
+  issueDate       DateTime
+  dueDate         DateTime
+  lineItems       String        // JSON string: [{description, quantity, unitPrice, vatPercent}]
+  subtotal        Float
+  vatTotal        Float
+  total           Float
+  currency        String        @default("DKK")
+  exchangeRate    Float?        // Exchange rate if currency != DKK
+  status          InvoiceStatus @default(DRAFT)
+  notes           String?
+  cancelled       Boolean       @default(false)
+  cancelReason    String?
+  contactId       String?       // Link to Contact (customer)
+  isDemo          Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact         Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  transactions    Transaction[]
+}
+
+// ─── PHASE 0: Compliance & Security ───────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  entityType  String
+  entityId    String
+  changes     String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  ipAddress   String?
+  userAgent   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Backup {
+  id            String   @id @default(cuid())
+  userId        String
+  triggerType   String
+  backupType    String
+  filePath      String
+  fileSize      Int
+  sha256        String?
+  status        String   @default("completed")
+  errorMessage  String?
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([backupType])
+  @@index([createdAt])
+  @@index([status])
+}
+
+// ─── PHASE 1: Chart of Accounts (Kontoplan) ───────────────────────
+// Required by Danish Bookkeeping Law §4-5
+
+model Account {
+  id          String      @id @default(cuid())
+  number      String      // Account number e.g. "1000", "1200", "4000"
+  name        String      // Danish account name
+  nameEn      String?     // English name
+  type        AccountType
+  group       AccountGroup
+  description String?
+  isActive    Boolean     @default(true)
+  isSystem    Boolean     @default(false) // Cannot be deleted
+  isDemo      Boolean     @default(false) // Demo data flag
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  journalLines  JournalEntryLine[]
+  budgetEntries  BudgetEntry[]
+
+  @@unique([userId, number, isDemo])
+  @@index([userId, type])
+  @@index([userId, group])
+  @@index([userId, isDemo])
+}
+
+// ─── PHASE 1: Double-Entry Journal (Finansjournal) ───────────────
+// Required by Danish Bookkeeping Law §5
+
+model JournalEntry {
+  id          String             @id @default(cuid())
+  date        DateTime
+  description String             // Description of the posting
+  reference   String?            // Bilagsnummer / voucher number
+  status      JournalEntryStatus @default(DRAFT)
+  cancelled   Boolean            @default(false)
+  cancelReason String?
+  isDemo      Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lines       JournalEntryLine[]
+  documents   Document[]
+
+  @@index([userId, date])
+  @@index([userId, status])
+}
+
+model JournalEntryLine {
+  id             String        @id @default(cuid())
+  journalEntryId String
+  accountId      String
+  debit          Float         @default(0)  // Debet
+  credit         Float         @default(0)  // Kredit
+  vatCode        VATCode?      // Momskode (optional)
+  description    String?       // Line-specific description
+  createdAt      DateTime      @default(now())
+  journalEntry   JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account        Account       @relation(fields: [accountId], references: [id])
+  bankMatches    BankStatementLine[]
+
+  @@index([journalEntryId])
+  @@index([accountId])
+}
+
+// ─── PHASE 1: Contacts (Debitorer/Kreditorer) ────────────────────
+
+model Contact {
+  id          String      @id @default(cuid())
+  name        String
+  cvrNumber   String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  postalCode  String?
+  country     String      @default("Danmark")
+  type        ContactType @default(CUSTOMER)
+  notes       String?
+  isActive    Boolean     @default(true)
+  isDemo      Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices    Invoice[]
+
+  @@index([userId, type])
+  @@index([userId, cvrNumber])
+}
+
+// ─── PHASE 1: Fiscal Periods / Period Locking ────────────────────
+// Required by Danish Bookkeeping Law §7-8 (Årsafslutning)
+
+model FiscalPeriod {
+  id          String       @id @default(cuid())
+  year        Int
+  month       Int          // 1-12
+  status      PeriodStatus @default(OPEN)
+  lockedAt    DateTime?
+  lockedBy    String?      // userId of who locked it
+  isDemo      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year, month, isDemo])
+  @@index([userId, year])
+  @@index([userId, status])
+}
+
+// ─── PHASE 2: Bank Statements ─────────────────────────────────────
+// Required by Danish Bookkeeping Law §4 (Bankafstemning)
+
+model BankStatement {
+  id            String                @id @default(cuid())
+  bankAccount   String                // Bank account number/identifier
+  startDate     DateTime
+  endDate       DateTime
+  openingBalance Float
+  closingBalance  Float
+  fileName      String?
+  importDate    DateTime              @default(now())
+  reconciled    Boolean               @default(false)
+  reconciledAt  DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  userId        String
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lines         BankStatementLine[]
+
+  @@index([userId, bankAccount])
+  @@index([userId, startDate])
+}
+
+model BankStatementLine {
+  id                   String              @id @default(cuid())
+  bankStatementId      String
+  date                 DateTime
+  description          String
+  reference            String?             // Payment reference
+  amount               Float
+  balance              Float               // Running balance
+  reconciliationStatus ReconciliationStatus @default(UNMATCHED)
+  matchedJournalLineId String?
+  matchedAt            DateTime?
+  createdAt            DateTime            @default(now())
+  bankStatement        BankStatement       @relation(fields: [bankStatementId], references: [id], onDelete: Cascade)
+  matchedJournalLine   JournalEntryLine?   @relation(fields: [matchedJournalLineId], references: [id])
+
+  @@index([bankStatementId])
+  @@index([reconciliationStatus])
+  @@index([matchedJournalLineId])
+}
+
+// ─── PHASE 2: Document Attachments (Bilag) ───────────────────────
+// Required by Danish Bookkeeping Law §4 (Bilagshåndtering)
+
+model Document {
+  id              String        @id @default(cuid())
+  journalEntryId  String
+  fileName        String
+  fileType        String        // MIME type
+  fileSize        Int           // bytes
+  filePath        String        // Server-side file path
+  description     String?
+  createdAt       DateTime      @default(now())
+  journalEntry    JournalEntry  @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  @@index([journalEntryId])
+}
+
+// ─── PHASE 3: Recurring Journal Entries ──────────────────────────
+// Automated recurring postings (rent, salaries, subscriptions)
+
+model RecurringEntry {
+  id            String             @id @default(cuid())
+  name          String             // Template name (e.g. "Husleje", "Løn")
+  description   String
+  frequency     RecurringFrequency
+  status        RecurringStatus    @default(ACTIVE)
+  startDate     DateTime           // First posting date
+  endDate       DateTime?          // Optional end date
+  nextExecution DateTime           // Next auto-execution date
+  lastExecuted  DateTime?          // Last execution date
+  lines         String             // JSON: [{accountId, debit, credit, description}]
+  reference     String?            // Bilagsnummer prefix
+  isDemo        Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, nextExecution])
+}
+
+// ─── PHASE 3: Budget System ──────────────────────────────────────
+// Budget planning per fiscal year with account-level detail
+
+model Budget {
+  id          String       @id @default(cuid())
+  name        String       // Budget name (e.g. "Budget 2025")
+  year        Int          // Fiscal year
+  notes       String?
+  isActive    Boolean      @default(true)
+  isDemo      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries     BudgetEntry[]
+
+  @@unique([userId, year])
+  @@index([userId])
+}
+
+model BudgetEntry {
+  id        String   @id @default(cuid())
+  budgetId  String
+  accountId String
+  january   Float   @default(0)
+  february  Float   @default(0)
+  march     Float   @default(0)
+  april     Float   @default(0)
+  may       Float   @default(0)
+  june      Float   @default(0)
+  july      Float   @default(0)
+  august    Float   @default(0)
+  september Float   @default(0)
+  october   Float   @default(0)
+  november  Float   @default(0)
+  december  Float   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  budget    Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  account   Account  @relation(fields: [accountId], references: [id])
+
+  @@unique([budgetId, accountId])
+  @@index([budgetId])
+  @@index([accountId])
+}

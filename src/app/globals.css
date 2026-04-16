@@ -1,0 +1,914 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ========================================
+   WARM & AIRY PALETTE — Purple Accent
+
+   Light Mode: Cream bg, classy purple primary, sage accents
+   Dark Mode: Warm charcoal, soft purple, muted tones
+   ======================================== */
+
+:root {
+  --radius: 0.75rem;
+  --background: #faf9f7;
+  --foreground: #2c2a27;
+  --card: #ffffff;
+  --card-foreground: #2c2a27;
+  --popover: #ffffff;
+  --popover-foreground: #2c2a27;
+  --primary: #554fe9;
+  --primary-foreground: #ffffff;
+  --secondary: #eeeefa;
+  --secondary-foreground: #5c554d;
+  --muted: #f1f0fa;
+  --muted-foreground: #8a8279;
+  --accent: #ebe8fc;
+  --accent-foreground: #554fe9;
+  --destructive: #c75450;
+  --border: #e8e3dc;
+  --input: #e2ddd5;
+  --ring: #554fe9;
+  --chart-1: #554fe9;
+  --chart-2: #7c9a82;
+  --chart-3: #c9a87c;
+  --chart-4: #9490e8;
+  --chart-5: #c9928f;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2c2a27;
+  --sidebar-primary: #554fe9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eeeefa;
+  --sidebar-accent-foreground: #554fe9;
+  --sidebar-border: #e8e3dc;
+  --sidebar-ring: #554fe9;
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+html.dark {
+  background-color: #1a1816;
+}
+
+.dark {
+  --background: #1a1816;
+  --foreground: #e8e4df;
+  --card: #242120;
+  --card-foreground: #e8e4df;
+  --popover: #242120;
+  --popover-foreground: #e8e4df;
+  --primary: #7a76f0;
+  --primary-foreground: #0e0d1a;
+  --secondary: #2e2a27;
+  --secondary-foreground: #d4cfc8;
+  --muted: #2e2a27;
+  --muted-foreground: #9a948c;
+  --accent: #28273e;
+  --accent-foreground: #a5a1f0;
+  --destructive: #e06b67;
+  --border: #3a3530;
+  --input: #3a3530;
+  --ring: #7a76f0;
+  --chart-1: #7a76f0;
+  --chart-2: #7c9a82;
+  --chart-3: #d4b896;
+  --chart-4: #a8a3e8;
+  --chart-5: #d4a5a2;
+  --sidebar: #1e1c1a;
+  --sidebar-foreground: #e8e4df;
+  --sidebar-primary: #7a76f0;
+  --sidebar-primary-foreground: #0e0d1a;
+  --sidebar-accent: #28273e;
+  --sidebar-accent-foreground: #a5a1f0;
+  --sidebar-border: #3a3530;
+  --sidebar-ring: #7a76f0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* ========================================
+   CARDS & CONTAINERS
+   ======================================== */
+
+[data-slot="card"] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.03);
+}
+
+.dark [data-slot="card"] {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.2);
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.03);
+  transition: all 0.25s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px -2px rgb(85 79 233 / 0.08);
+  border-color: #ddd5cb;
+}
+
+.dark .stat-card:hover {
+  box-shadow: 0 4px 12px -2px rgb(122 118 240 / 0.1);
+  border-color: #4a4540;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px 0 rgb(85 79 233 / 0.15);
+}
+
+.btn-primary:hover {
+  background: #4a42d0;
+  box-shadow: 0 4px 14px -2px rgb(85 79 233 / 0.25);
+}
+
+.dark .btn-primary {
+  background: var(--primary);
+  box-shadow: 0 1px 3px 0 rgb(122 118 240 / 0.15);
+}
+
+.dark .btn-primary:hover {
+  background: #6a66d8;
+  box-shadow: 0 4px 14px -2px rgb(122 118 240 / 0.25);
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #554fe9 0%, #7a76f0 100%);
+  color: white;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #4a42d0 0%, #6a66d8 100%);
+  box-shadow: 0 4px 16px rgb(85 79 233 / 0.25);
+}
+
+/* ========================================
+   HERO & BANNERS
+   ======================================== */
+
+.hero-gradient {
+  background: linear-gradient(135deg, #554fe9 0%, #7a76f0 50%, #7c9a82 100%);
+  color: white;
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #554fe9 0%, #7a76f0 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #7a76f0 0%, #a5a1f0 100%);
+}
+
+.gradient-sage {
+  background: linear-gradient(135deg, #7c9a82 0%, #9bb5a0 100%);
+}
+
+/* Dark mode adjustments */
+.dark .hero-gradient {
+  background: linear-gradient(135deg, #4a42d0 0%, #3d38a8 50%, #4a6e50 100%);
+}
+
+/* ========================================
+   STAT ICONS (warm backgrounds)
+   ======================================== */
+
+.stat-icon-primary {
+  background: #ebe8fc;
+}
+
+.dark .stat-icon-primary {
+  background: #28273e;
+}
+
+.stat-icon-purple {
+  background: #eee9fc;
+}
+
+.dark .stat-icon-purple {
+  background: #252440;
+}
+
+.stat-icon-turquoise {
+  background: #edf4f0;
+}
+
+.dark .stat-icon-turquoise {
+  background: #242e28;
+}
+
+.stat-icon-blue {
+  background: #edf1f5;
+}
+
+.dark .stat-icon-blue {
+  background: #252b32;
+}
+
+.stat-icon-green {
+  background: #edf5ef;
+}
+
+.dark .stat-icon-green {
+  background: #242e26;
+}
+
+.stat-icon-red {
+  background: #f7eeed;
+}
+
+.dark .stat-icon-red {
+  background: #2e2524;
+}
+
+.stat-icon-amber {
+  background: #f7f2ec;
+}
+
+.dark .stat-icon-amber {
+  background: #2e2920;
+}
+
+/* ========================================
+   NAVIGATION ACTIVE STATE
+   ======================================== */
+
+.nav-active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px -2px rgb(85 79 233 / 0.2);
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+[data-slot="badge"] {
+  background: #eeeefa;
+  color: #554fe9;
+  border: 1px solid #ddd8f4;
+  font-weight: 500;
+}
+
+.dark [data-slot="badge"] {
+  background: #252440;
+  color: #a5a1f0;
+  border: 1px solid #353350;
+}
+
+.badge-green {
+  background: #edf5ef;
+  color: #5a8a5e;
+  border: 1px solid #d8e8da;
+}
+
+.dark .badge-green {
+  background: #242e26;
+  color: #8cc492;
+  border: 1px solid #304838;
+}
+
+.badge-amber {
+  background: #f7f2ec;
+  color: #8a6a3e;
+  border: 1px solid #eee0cc;
+}
+
+.dark .badge-amber {
+  background: #2e2920;
+  color: #d4b06e;
+  border: 1px solid #403520;
+}
+
+.badge-red {
+  background: #f7eeed;
+  color: #c75450;
+  border: 1px solid #eedcd8;
+}
+
+.dark .badge-red {
+  background: #2e2524;
+  color: #e06b67;
+  border: 1px solid #402828;
+}
+
+.badge-purple {
+  background: #ebe8fc;
+  color: #554fe9;
+  border: 1px solid #d2cdf0;
+}
+
+.dark .badge-purple {
+  background: #252440;
+  color: #a5a1f0;
+  border: 1px solid #353350;
+}
+
+.badge-turquoise {
+  background: #edf4f0;
+  color: #4a7a72;
+  border: 1px solid #d4e8e2;
+}
+
+.dark .badge-turquoise {
+  background: #242e28;
+  color: #80c0b4;
+  border: 1px solid #304040;
+}
+
+.badge-blue {
+  background: #edf1f5;
+  color: #7dabb5;
+  border: 1px solid #d4e0ec;
+}
+
+.dark .badge-blue {
+  background: #252b32;
+  color: #80c0cc;
+  border: 1px solid #303a48;
+}
+
+/* ========================================
+   CHARTS
+   ======================================== */
+
+.chart-container {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+/* ========================================
+   INFO BOXES
+   ======================================== */
+
+.info-box-primary {
+  background: #ebe8fc;
+  border: 1px solid #d2cdf0;
+}
+
+.dark .info-box-primary {
+  background: #252440;
+  border: 1px solid #353350;
+}
+
+.info-box-turquoise {
+  background: #eef5f2;
+  border: 1px solid #d0e4dc;
+}
+
+.dark .info-box-turquoise {
+  background: #1e2a26;
+  border: 1px solid #2e4038;
+}
+
+.info-box-green {
+  background: #eef5f0;
+  border: 1px solid #d0e6d6;
+}
+
+.dark .info-box-green {
+  background: #1e2a22;
+  border: 1px solid #2e4030;
+}
+
+.info-box-blue {
+  background: #eef2f6;
+  border: 1px solid #d0dce8;
+}
+
+.dark .info-box-blue {
+  background: #1e2430;
+  border: 1px solid #2e3850;
+}
+
+/* ========================================
+   TABLE
+   ======================================== */
+
+.table-row-hover:hover {
+  background: #faf7f4;
+}
+
+.dark .table-row-hover:hover {
+  background: #2a2724;
+}
+
+/* ========================================
+   FORCE LIGHT MODE (login page)
+   ======================================== */
+
+html:has(.light-forced) {
+  --background: #faf9f7 !important;
+  background-color: #faf9f7 !important;
+  background-image: none !important;
+  color: #2c2a27 !important;
+}
+
+.light-forced,
+.light-forced *,
+.light-forced *::before,
+.light-forced *::after {
+  color-scheme: light !important;
+}
+
+.light-forced {
+  --background: #faf9f7 !important;
+  --foreground: #2c2a27 !important;
+  --card: #ffffff !important;
+  --card-foreground: #2c2a27 !important;
+  --popover: #ffffff !important;
+  --popover-foreground: #2c2a27 !important;
+  --primary: #554fe9 !important;
+  --primary-foreground: #ffffff !important;
+  --secondary: #eeeefa !important;
+  --secondary-foreground: #5c554d !important;
+  --muted: #f1f0fa !important;
+  --muted-foreground: #8a8279 !important;
+  --accent: #ebe8fc !important;
+  --accent-foreground: #554fe9 !important;
+  --destructive: #c75450 !important;
+  --destructive-foreground: #ffffff !important;
+  --border: #e8e3dc !important;
+  --input: #e2ddd5 !important;
+  --ring: #554fe9 !important;
+  background-color: #faf9f7 !important;
+  color: #2c2a27 !important;
+}
+
+/* Neutralize dark mode overrides on shadcn components inside light-forced */
+.light-forced [data-slot="input"] {
+  background-color: transparent !important;
+  border-color: var(--input) !important;
+  color: var(--foreground) !important;
+}
+
+.light-forced [data-slot="input"]::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+.light-forced [data-slot="button"] {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: transparent !important;
+}
+
+.light-forced [data-slot="button"]:hover {
+  background-color: #4a42d0 !important;
+}
+
+.light-forced [data-slot="label"] {
+  color: var(--foreground) !important;
+}
+
+.light-forced [data-slot="label"] .text-gray-400,
+.light-forced [data-slot="label"] span.text-gray-400 {
+  color: #b0a89e !important;
+}
+
+/* ========================================
+   SCROLLBAR
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(85, 79, 233, 0.12);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(85, 79, 233, 0.25);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(122, 118, 240, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(122, 118, 240, 0.3);
+}
+
+@supports (hover: hover) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(85, 79, 233, 0.12) transparent;
+  }
+  .dark * {
+    scrollbar-color: rgba(122, 118, 240, 0.15) transparent;
+  }
+}
+
+@supports not (hover: hover) {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ========================================
+   INPUT FOCUS
+   ======================================== */
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 2px rgb(85 79 233 / 0.12);
+  border-color: #554fe9;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  box-shadow: 0 0 0 2px rgb(122 118 240 / 0.2);
+  border-color: #7a76f0;
+}
+
+/* ========================================
+   MODALS & DIALOGS — Consistent dark mode
+   ======================================== */
+
+.dark [data-slot="sheet-content"],
+.dark [data-slot="dialog-content"],
+.dark [role="dialog"] {
+  background: #242120;
+  border: 1px solid #3a3530;
+}
+
+.dark [data-slot="dropdown-menu-content"],
+.dark [role="menu"],
+.dark [data-slot="select-content"] {
+  background: #242120;
+  border: 1px solid #3a3530;
+  color: #e8e4df;
+}
+
+/* ========================================
+   BUTTON OUTLINE — Consistent dark mode
+   ======================================== */
+
+.dark button[class*="outline"] {
+  border-color: #3a3530;
+  background: transparent;
+  color: #e8e4df;
+}
+
+.dark button[class*="outline"]:hover {
+  background: #2e2a27;
+  border-color: #504a42;
+  color: #e8e4df;
+}
+
+/* ========================================
+   TABLE HEADERS & ROWS — Light mode fix
+   ======================================== */
+
+.dark [data-slot="table-header"] {
+  background: transparent;
+  color: #e8e4df;
+}
+
+.dark [data-slot="table-cell"] {
+  color: #e8e4df;
+  border-color: #3a3530;
+}
+
+/* ========================================
+   TEXT GRADIENT
+   ======================================== */
+
+.text-gradient {
+  background: linear-gradient(135deg, #554fe9 0%, #7c9a82 50%, #9490e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   AVATAR
+   ======================================== */
+
+.avatar-gradient {
+  background: linear-gradient(135deg, #554fe9 0%, #7a76f0 100%);
+}
+
+/* ========================================
+   GLOW EFFECTS (Dark mode only)
+   ======================================== */
+
+.dark .glow-primary {
+  box-shadow:
+    0 0 30px rgba(122, 118, 240, 0.1),
+    0 0 60px rgba(122, 118, 240, 0.04);
+}
+
+.dark .glow-sage {
+  box-shadow:
+    0 0 30px rgba(124, 154, 130, 0.08),
+    0 0 60px rgba(124, 154, 130, 0.03);
+}
+
+/* ========================================
+   SUBTLE BACKGROUND PATTERNS
+   ======================================== */
+
+.bg-mesh {
+  background:
+    radial-gradient(at 20% 20%, rgba(85, 79, 233, 0.04) 0, transparent 50%),
+    radial-gradient(at 80% 40%, rgba(122, 118, 240, 0.03) 0, transparent 50%),
+    radial-gradient(at 40% 80%, rgba(124, 154, 130, 0.03) 0, transparent 50%);
+}
+
+.dark .bg-mesh {
+  background:
+    radial-gradient(at 20% 20%, rgba(122, 118, 240, 0.06) 0, transparent 50%),
+    radial-gradient(at 80% 40%, rgba(124, 154, 130, 0.04) 0, transparent 50%),
+    radial-gradient(at 40% 80%, rgba(148, 144, 232, 0.04) 0, transparent 50%);
+}
+
+/* ========================================
+   COMPREHENSIVE DARK MODE OVERRIDES
+   Fix light/dark inconsistencies across all
+   shadcn components with !important
+   ======================================== */
+
+/* Dialog / Sheet / Alert Dialog */
+.dark [data-slot="dialog-content"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="dialog-header"] {
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="dialog-title"] {
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="dialog-description"] {
+  color: var(--muted-foreground) !important;
+}
+
+.dark [data-slot="sheet-content"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="alert-dialog-content"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="alert-dialog-title"] {
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="alert-dialog-description"] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Select / Dropdown / Popover */
+.dark [data-slot="select-content"] {
+  background: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+.dark [data-slot="select-item"] {
+  color: var(--popover-foreground) !important;
+}
+
+.dark [data-slot="dropdown-menu-content"] {
+  background: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+.dark [data-slot="dropdown-menu-item"] {
+  color: var(--popover-foreground) !important;
+}
+
+.dark [data-slot="popover-content"] {
+  background: var(--popover) !important;
+  border-color: var(--border) !important;
+  color: var(--popover-foreground) !important;
+}
+
+/* Tabs */
+.dark [data-slot="tabs-list"] {
+  background: var(--muted) !important;
+}
+
+.dark [data-slot="tabs-trigger"] {
+  color: var(--muted-foreground) !important;
+}
+
+.dark [data-slot="tabs-trigger"][data-state="active"] {
+  background: var(--card) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Table */
+.dark [data-slot="table"] {
+  color: var(--card-foreground) !important;
+}
+
+.dark [data-slot="table-header"] {
+  color: var(--muted-foreground) !important;
+}
+
+.dark [data-slot="table-head"] {
+  color: var(--muted-foreground) !important;
+}
+
+.dark [data-slot="table-row"] {
+  border-color: var(--border) !important;
+}
+
+.dark [data-slot="table-cell"] {
+  color: var(--card-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+/* Tooltip */
+.dark [data-slot="tooltip-content"] {
+  background: var(--foreground) !important;
+  color: var(--background) !important;
+}
+
+/* Input in dark mode */
+.dark [data-slot="input"] {
+  background: transparent !important;
+  border-color: var(--input) !important;
+  color: var(--foreground) !important;
+}
+
+.dark [data-slot="input"]::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+/* Textarea in dark mode */
+.dark [data-slot="textarea"] {
+  background: transparent !important;
+  border-color: var(--input) !important;
+  color: var(--foreground) !important;
+}
+
+/* Label in dark mode */
+.dark [data-slot="label"] {
+  color: var(--card-foreground) !important;
+}
+
+/* Skeleton in dark mode */
+.dark [data-slot="skeleton"] {
+  background: var(--muted) !important;
+}
+
+/* Switch in dark mode */
+.dark [data-slot="switch"] {
+  background: var(--input) !important;
+}
+
+/* Separator in dark mode */
+.dark [data-slot="separator"] {
+  background: var(--border) !important;
+}
+
+/* ========================================
+   DARK MODE — bg-white / bg-gray-50 fixes
+   Force dark backgrounds on common elements
+   that override with hardcoded light classes
+   ======================================== */
+
+/* Dialogs, Alert Dialogs, Selects with bg-white override */
+.dark [data-slot="dialog-content"].bg-white,
+.dark [data-slot="alert-dialog-content"].bg-white,
+.dark [data-slot="select-content"].bg-white {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* SelectTrigger with bg-white */
+.dark [data-slot="select-trigger"].bg-white {
+  background: var(--input) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* Inputs with bg-gray-50 */
+.dark [data-slot="input"].bg-gray-50,
+.dark input.bg-gray-50,
+.dark [data-slot="input"][class*="bg-gray-50"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* Textarea with bg-gray-50 */
+.dark textarea.bg-gray-50 {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* SelectTrigger with bg-gray-50 */
+.dark [data-slot="select-trigger"][class*="bg-gray-50"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+/* General bg-white containers in dark mode */
+.dark .bg-white[data-radix-collection-item],
+.dark .bg-white[class*="rounded"][class*="border"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Invoice preview should stay white in both modes */
+.dark .invoice-preview-container.bg-white {
+  background: #ffffff !important;
+}
