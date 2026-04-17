@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.svg" alt="AlphaAi Accounting" width="200" />
+  <img src="public/logo-cleanBack.png" alt="AlphaAi Accounting" width="200" />
 </p>
 
 <h1 align="center">AlphaAi Accounting</h1>
